@@ -1,0 +1,5 @@
+[master]
+<master server IP>
+
+[slave]
+<slave server IP>

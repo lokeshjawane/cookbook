@@ -1,0 +1,25 @@
+---
+- set_fact:
+      postgres_version: "{% if ansible_distribution_version == '14.04' %}9.3{% elif ansible_distribution_version == '16.04' %}9.5{% else %}''{% endif %}"
+  when: postgres_version is not defined
+
+#For testing
+# - copy:
+#     # content: "{{ ansible_distribution_release }} {{ ansible_distribution_version}}"
+#     # content: "{{  hostvars[groups['testing'][0]] }}"
+#     content: "{{ postgres_version }}"
+#     dest: /tmp/testing
+#   when:
+#     ansible_distribution_version == '14.04' #and  postgres_version is defined
+
+- apt_repository:
+    repo: 'deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main'
+    filename: 'pgdg'
+  when:
+    ansible_distribution_version == '14.04' and {{ postgres_version }} == 9.5
+
+- apt_key: 
+    url: https://ftp-master.debian.org/keys/archive-key-6.0.asc
+    state: present
+  when:
+    ansible_distribution_version == '14.04' and {{ postgres_version }} == 9.5

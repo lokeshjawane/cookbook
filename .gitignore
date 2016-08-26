@@ -1,0 +1,4 @@
+ansible-postgresql/roles/master/vars/vars.yml
+ansible-postgresql/.vault_pass.txt
+ansible-postgresql/hosts
+ansible-postgresql/testing.yml

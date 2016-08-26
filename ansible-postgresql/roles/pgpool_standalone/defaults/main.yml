@@ -1,0 +1,16 @@
+enable_pool_hba: "on"
+pool_passwd: pool_passwd
+connection_cache: "off"
+replication_mode: "off"
+replicate_select: "off"
+load_balance_mode: "on"
+master_slave_mode: "on"
+master_slave_sub_mode: 'stream'
+sr_check_user: 'pgpool'
+wd_lifecheck_user: 'pgpool'
+pgpool_db_hosts: ['172.17.0.2', '172.17.0.3']
+pool_user: 'rails'
+pool_user_password: 'secret'
+trigger_file: /tmp/postgresql.trigger.5432
+health_check_user: 'pgpool'
+# other servers

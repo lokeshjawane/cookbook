@@ -1,0 +1,4 @@
+roles/master/vars/vars.yml
+.vault_pass.txt
+hosts
+testing.yml

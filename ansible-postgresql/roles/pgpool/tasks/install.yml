@@ -1,0 +1,57 @@
+---
+  #Include encrypte inventory file
+  - include_vars: spoilers.yml
+
+  - name: ensure apt cache is up to date
+    apt: update_cache=yes
+
+  - name: ensure packages are installed
+    apt: name={{item}} allow_unauthenticated=yes
+    with_items:
+        - postgresql-client-{{ postgres_version }}
+        - pgpool2
+
+  - name: set pgpool configuration file
+    template: src=templates/pgpool.j2 dest=/etc/pgpool2/pgpool.conf
+
+  - name: remove local trust login entry
+    lineinfile:
+      dest: /etc/pgpool2/pool_hba.conf
+      regexp: "^local   all"
+      state: absent
+
+  - name: Allow backend db login from pgpool
+    lineinfile:
+      dest: /etc/pgpool2/pool_hba.conf
+      line: "local all all md5"
+      # regexp: "^#local all"
+
+  - name: generate password for postgres login
+    shell: pg_md5 -u {{pool_user}} -m {{pool_user_password}}
+
+  - name: Install failover script to path
+    template: 
+      src: templates/failover.sh.j2 
+      dest: /usr/bin/failover.sh
+      mode: 0755
+
+  - name: Check for the postgres service
+    service: 
+      name: pgpool2
+      state: started
+      
+  #Put public key to authorized_keys file 
+  - authorized_key:
+      user: postgres
+      key: "{{ id_rsa_pub }}"
+      #path: '/etc/ssh/authorized_keys/charlie'
+      manage_dir: no
+
+  #Set the private key file to authentication postgres user between nodes
+  - name: Put the spoiler text in the tmp directory on the remote server.
+    copy:
+      content="{{id_rsa_pri}}"
+      mode=0600
+      owner=postgres
+      group=postgres
+      dest=/var/lib/postgresql/.ssh/id_rsa

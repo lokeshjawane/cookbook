@@ -1,0 +1,3 @@
+---
+- include: pg_repo.yml
+- include: install_postgres.yml

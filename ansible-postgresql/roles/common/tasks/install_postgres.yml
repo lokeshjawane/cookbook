@@ -1,0 +1,38 @@
+---
+#Include encrypte inventory file
+- include_vars: spoilers.yml
+
+- name: ensure apt cache is up to date
+  apt: update_cache=yes
+
+- name: ensure packages are installed
+  apt: name={{item}} allow_unauthenticated=yes
+  with_items:
+      - postgresql-{{ postgres_version }}
+      - postgresql-contrib-{{ postgres_version }}
+      - libpq-dev
+      - python-psycopg2
+
+# Check for the services
+- name: check the service started
+  service: name=postgresql  state=stopped
+
+#Set configuration for node
+- name: Set the configuration file
+  template: src=templates/postgres_master.j2 dest="/etc/postgresql/{{ postgres_version}}/main/postgresql.conf"
+
+#Put public key to authorized_keys file 
+- authorized_key:
+    user: postgres
+    key: "{{ id_rsa_pub }}"
+    #path: '/etc/ssh/authorized_keys/charlie'
+    manage_dir: no
+
+#Set the private key file to authentication postgres user between nodes
+- name: Put the spoiler text in the tmp directory on the remote server.
+  copy:
+    content="{{id_rsa_pri}}"
+    mode=0600
+    owner=postgres
+    group=postgres
+    dest=/var/lib/postgresql/.ssh/id_rsa

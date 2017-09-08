@@ -1,0 +1,15 @@
+---
+- hosts: windows
+  gather_facts: true
+  tasks: []
+
+- hosts: windows
+  tasks:
+   - raw: '(Get-CimInstance Win32_Processor)[0]| fl *'
+   - name: Get Firewall Status
+     raw: (Get-ItemProperty HKLM:\SYSTEM\CurrentControlSet\services\SharedAccess\Parameters\FirewallPolicy\StandardProfile).EnableFirewall
+     register: FwStatus
+   - debug: msg="Firewall Status = {{ FwStatus | regex_replace('(\\r\\n)','') }}"
+   - name: Disable Firewall
+     raw: set-NetFirewallProfile -all -Enabled false
+     when: FwStatus.stdout| regex_replace('(\\r\\n)','') != "0"
